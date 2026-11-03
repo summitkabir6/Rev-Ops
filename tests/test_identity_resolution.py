@@ -43,12 +43,12 @@ def test_different_emails_on_the_same_order_merge_by_order_id(warehouse):
 
 
 def test_plus_address_lookalikes_are_flagged_not_merged(warehouse):
-    plus = key_for(warehouse, "jo.smith+gym@gmail.com")
-    plain = key_for(warehouse, "josmith@gmail.com")
+    plus = key_for(warehouse, "jo.smith+gym@example.com")
+    plain = key_for(warehouse, "jo.smith@example.com")
     assert plus != plain
     pair = warehouse.execute("""
         SELECT count(*) FROM identity_review
-        WHERE 'jo.smith+gym@gmail.com' IN (email_a, email_b) AND 'josmith@gmail.com' IN (email_a, email_b)
+        WHERE 'jo.smith+gym@example.com' IN (email_a, email_b) AND 'jo.smith@example.com' IN (email_a, email_b)
     """).fetchall()[0][0]
     assert pair == 1
     flagged = warehouse.execute(

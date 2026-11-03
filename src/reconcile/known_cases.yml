@@ -1,6 +1,9 @@
 # Disagreements found while running the quiz funnel (29 Sep - 29 Oct 2026), with their causes.
 # Each case has a check that re-measures the evidence from whatever data is loaded,
 # so the numbers printed next to a case always come from the current run.
+# `published` lists figures taken as given from the growth-systems write-up
+# (github.com/summitkabir6/growth-systems); they are printed with their source and never
+# recomputed, because this pipeline has no Meta connector.
 
 - id: lead_counts_three_ways
   title: Three systems, three lead counts, for the first two days of the quiz
@@ -71,3 +74,76 @@
     FROM fct_order WHERE source_of_truth = 'orders_api' AND customer_key IN (
         SELECT c.customer_key FROM stg_klaviyo_events k JOIN email_to_customer c USING (email_norm)
         WHERE k.stream = 'quiz_completed')
+
+- id: meta_vs_klaviyo_leads
+  title: Meta's lead count against Klaviyo's for the lead campaign
+  found: 2026-11-03
+  cause: >
+    Meta's "Website Leads" are what its pixel and Conversions API reported, used for
+    optimisation. Klaviyo receives every quiz submission with the email attached. Meta can
+    count test runs that skipped ?test=1 and leads its deduplication counted twice; whether
+    the server-side deduplication works was never verified.
+  resolution: >
+    Klaviyo stays the source of truth for leads. Cost per lead is computed on Klaviyo's count,
+    with Meta's own figure shown beside it.
+  published:
+    - {label: "Meta Website Leads, ADHD Quiz campaign, 29 Sep - 28 Oct", value: 141, source: Meta Ads Manager via growth-systems}
+    - {label: "Meta spend, ADHD Quiz campaign", value: 324.19, source: Meta Ads Manager via growth-systems}
+    - {label: Meta cost per lead, value: 2.29, source: Meta Ads Manager via growth-systems}
+  check: |
+    SELECT 'klaviyo leads tagged utm_campaign ADHD Quiz, 29 Sep - 28 Oct' AS measure, count(DISTINCT email_norm) AS value
+    FROM stg_klaviyo_events WHERE stream = 'quiz_completed' AND NOT is_test AND utm_campaign = 'ADHD Quiz'
+      AND email_norm NOT IN (SELECT email_norm FROM internal_emails)
+      AND CAST(timezone('__TIMEZONE__', CAST(occurred_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-10-28'
+    UNION ALL
+    SELECT 'cost per klaviyo lead at the published spend', round(324.19 / count(DISTINCT email_norm), 2)
+    FROM stg_klaviyo_events WHERE stream = 'quiz_completed' AND NOT is_test AND utm_campaign = 'ADHD Quiz'
+      AND email_norm NOT IN (SELECT email_norm FROM internal_emails)
+      AND CAST(timezone('__TIMEZONE__', CAST(occurred_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-10-28'
+    UNION ALL
+    SELECT 'klaviyo leads with an unresolved {{campaign.name}}, same window', count(DISTINCT email_norm)
+    FROM stg_klaviyo_events WHERE stream = 'quiz_completed' AND NOT is_test AND utm_campaign LIKE '%{{%'
+      AND CAST(timezone('__TIMEZONE__', CAST(occurred_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-10-28'
+
+- id: published_quiz_funnel
+  title: Published quiz funnel figures that PostHog does not reproduce
+  found: 2026-11-03
+  cause: >
+    growth-systems publishes 534 starts, 388 completed results, 313 email captures and 116
+    store taps for 29 Sep - 29 Oct, labelled PostHog. PostHog does not reproduce any of them as
+    events, sessions or people, with or without test traffic: it holds fewer quiz_completed and
+    quiz_email_submitted events in its whole history than the published figures. The per-ad
+    rows in the same write-up do reproduce, as raw event counts. Where the four totals came
+    from is not yet confirmed; Meta Events Manager, which receives QuizStart, QuizComplete, Lead
+    and StoreClick, is the likely source.
+  resolution: >
+    A funnel figure is not published without its definition (events, sessions or people), its
+    host filter and its test filter. The published cost per capture divides spend by 313, so it
+    changes with the capture count.
+  published:
+    - {label: Quiz starts, value: 534, source: growth-systems}
+    - {label: Completed results, value: 388, source: growth-systems}
+    - {label: Email captures, value: 313, source: growth-systems}
+    - {label: Store taps, value: 116, source: growth-systems}
+    - {label: "Quiz spend, both campaigns", value: 622.68, source: Meta Ads Manager via growth-systems}
+    - {label: Cost per email capture, value: 1.99, source: growth-systems}
+  check: |
+    SELECT 'posthog people who started, 29 Sep - 29 Oct, production, test excluded' AS measure,
+           count(*) FILTER (WHERE CAST(timezone('__TIMEZONE__', CAST(started_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-10-29') AS value
+    FROM stg_posthog_quiz_people WHERE is_production AND NOT is_test
+    UNION ALL
+    SELECT 'posthog people who completed, same window',
+           count(*) FILTER (WHERE CAST(timezone('__TIMEZONE__', CAST(completed_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-10-29')
+    FROM stg_posthog_quiz_people WHERE is_production AND NOT is_test
+    UNION ALL
+    SELECT 'posthog people who gave an email, same window',
+           count(*) FILTER (WHERE CAST(timezone('__TIMEZONE__', CAST(email_submitted_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-10-29')
+    FROM stg_posthog_quiz_people WHERE is_production AND NOT is_test
+    UNION ALL
+    SELECT 'posthog people who tapped a store badge, same window',
+           count(*) FILTER (WHERE CAST(timezone('__TIMEZONE__', CAST(store_clicked_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-10-29')
+    FROM stg_posthog_quiz_people WHERE is_production AND NOT is_test
+    UNION ALL
+    SELECT 'cost per posthog email capture at the published spend',
+           round(622.68 / count(*) FILTER (WHERE CAST(timezone('__TIMEZONE__', CAST(email_submitted_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-10-29'), 2)
+    FROM stg_posthog_quiz_people WHERE is_production AND NOT is_test

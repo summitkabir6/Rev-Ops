@@ -197,6 +197,8 @@ def render(rows: list[Row], exceptions: list[Exception_], cases: list[dict], sta
         lines.append(f"### {c['title']}")
         lines.append(f"Cause: {c['cause'].strip()}")
         lines.append("")
+        for p in c.get("published") or []:
+            lines.append(f"- published: {p['label']}: {fmt(p['value'])} (source: {p['source']})")
         for measure, value in c["evidence"]:
             lines.append(f"- {measure}: {fmt(as_number(value))}")
         lines.append("")

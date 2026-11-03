@@ -90,7 +90,7 @@ both["status"] = "REFUNDED"
 both["refunds"] = [(both["cancelled"], both["total"])]
 
 orders[18]["test"] = True
-orders[33]["email"] = "jo.smith+gym@gmail.com"   # plus-address variant of a Klaviyo-only lead
+orders[33]["email"] = "jo.smith+gym@example.com"   # plus-address variant of a Klaviyo-only lead
 orders[50]["email"] = "pat.lee@work.example.com"  # Klaviyo profile holds pat.lee@home.example.com
 
 # An order placed before the window, cancelled inside it.
@@ -213,7 +213,7 @@ leads.sort(key=lambda x: x["ts"])
 leads[0]["ts"] = WINDOW_START + timedelta(hours=3)        # before PostHog started
 leads[1]["ts"] = WINDOW_START + timedelta(hours=5)        # before PostHog started
 leads[7]["utm"] = "{{ad.name}}"
-leads[9]["email"] = "josmith@gmail.com"                   # plus-address pair with order #5033
+leads[9]["email"] = "jo.smith@example.com"                   # plus-address pair with order #5033
 leads.append({"email": INTERNAL, "ts": WINDOW_START + timedelta(hours=4), "consent": True,
               "utm": None, "tapped": True, "test": True})
 
