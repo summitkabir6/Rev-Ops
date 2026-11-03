@@ -1,9 +1,8 @@
 # Disagreements found while running the quiz funnel (29 Sep - 29 Oct 2026), with their causes.
 # Each case has a check that re-measures the evidence from whatever data is loaded,
 # so the numbers printed next to a case always come from the current run.
-# `published` lists figures taken as given from the growth-systems write-up
-# (github.com/summitkabir6/growth-systems); they are printed with their source and never
-# recomputed, because this pipeline has no Meta connector.
+# `published` lists figures taken as given from an earlier write-up of mine; they are
+# printed with their source and never recomputed, because this pipeline has no Meta connector.
 
 - id: lead_counts_three_ways
   title: Three systems, three lead counts, for the first two days of the quiz
@@ -87,9 +86,9 @@
     Klaviyo stays the source of truth for leads. Cost per lead is computed on Klaviyo's count,
     with Meta's own figure shown beside it.
   published:
-    - {label: "Meta Website Leads, ADHD Quiz campaign, 29 Sep - 28 Oct", value: 141, source: Meta Ads Manager via growth-systems}
-    - {label: "Meta spend, ADHD Quiz campaign", value: 324.19, source: Meta Ads Manager via growth-systems}
-    - {label: Meta cost per lead, value: 2.29, source: Meta Ads Manager via growth-systems}
+    - {label: "Meta Website Leads, ADHD Quiz campaign, 29 Sep - 28 Oct", value: 141, source: Meta Ads Manager via earlier write-up}
+    - {label: "Meta spend, ADHD Quiz campaign", value: 324.19, source: Meta Ads Manager via earlier write-up}
+    - {label: Meta cost per lead, value: 2.29, source: Meta Ads Manager via earlier write-up}
   check: |
     SELECT 'klaviyo leads tagged utm_campaign ADHD Quiz, 29 Sep - 28 Oct' AS measure, count(DISTINCT email_norm) AS value
     FROM stg_klaviyo_events WHERE stream = 'quiz_completed' AND NOT is_test AND utm_campaign = 'ADHD Quiz'
@@ -109,7 +108,7 @@
   title: Published quiz funnel figures that PostHog does not reproduce
   found: 2026-11-03
   cause: >
-    growth-systems publishes 534 starts, 388 completed results, 313 email captures and 116
+    An earlier write-up publishes 534 starts, 388 completed results, 313 email captures and 116
     store taps for 29 Sep - 29 Oct, labelled PostHog. PostHog does not reproduce any of them as
     events, sessions or people, with or without test traffic: it holds fewer quiz_completed and
     quiz_email_submitted events in its whole history than the published figures. The per-ad
@@ -121,12 +120,12 @@
     host filter and its test filter. The published cost per capture divides spend by 313, so it
     changes with the capture count.
   published:
-    - {label: Quiz starts, value: 534, source: growth-systems}
-    - {label: Completed results, value: 388, source: growth-systems}
-    - {label: Email captures, value: 313, source: growth-systems}
-    - {label: Store taps, value: 116, source: growth-systems}
-    - {label: "Quiz spend, both campaigns", value: 622.68, source: Meta Ads Manager via growth-systems}
-    - {label: Cost per email capture, value: 1.99, source: growth-systems}
+    - {label: Quiz starts, value: 534, source: earlier write-up}
+    - {label: Completed results, value: 388, source: earlier write-up}
+    - {label: Email captures, value: 313, source: earlier write-up}
+    - {label: Store taps, value: 116, source: earlier write-up}
+    - {label: "Quiz spend, both campaigns", value: 622.68, source: Meta Ads Manager via earlier write-up}
+    - {label: Cost per email capture, value: 1.99, source: earlier write-up}
   check: |
     SELECT 'posthog people who started, 29 Sep - 29 Oct, production, test excluded' AS measure,
            count(*) FILTER (WHERE CAST(timezone('__TIMEZONE__', CAST(started_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-10-29') AS value
