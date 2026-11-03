@@ -1,5 +1,7 @@
 # Rev-Ops
 
+Summit Kabir, third-year Mechatronics Engineering, Ontario Tech. I run the data and operations systems at a DTC fitness company and GTM and Product at a health-tech app, and this is the reconciliation pipeline I built because its numbers lived in three systems that disagreed.
+
 A reconciliation and weekly-reporting pipeline for a direct-to-consumer business whose numbers live in three systems that each tell a different story: Shopify (orders and money), Klaviyo (email, leads and its own copy of every order) and PostHog (quiz behaviour). It exists because reporting from any one of them on its own was wrong in ways nobody could see, and checking by hand took longer than the decision it was meant to support.
 
 Built on real exports from Gym Army, a Canadian fitness-equipment brand, and its LockedIn quiz funnel. Real exports stay on my machine; this repo holds the code, synthetic sample rows with the same schemas, and figures the code printed from the real run.
