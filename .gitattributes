@@ -1,0 +1,3 @@
+# run.sh must keep LF endings or the Linux CI runner cannot execute it.
+* text=auto eol=lf
+*.csv -text

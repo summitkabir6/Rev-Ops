@@ -1,0 +1,51 @@
+# Every rule the pipeline applies lives here, so a change in definition is a one-line diff.
+
+# Shopify reports in the shop's time zone, so every source is cut on the same local calendar.
+timezone: America/Toronto
+
+# Default window for `reconcile` when no dates are passed: the 120 days pulled on 2026-11-03.
+default_window:
+  start: 2026-07-05
+  end: 2026-11-02
+
+# The --dry-run report pretends today is this date, so the sample always has a full prior week.
+sample_as_of: 2026-11-03
+
+# The quiz only counts traffic from the production host. Lovable preview domains also send events.
+quiz:
+  host: quiz.gymarmy.app
+  app: lockedin_quiz
+
+# Which system answers which question. A number from one system is never presented as another's.
+source_of_truth:
+  order_count: shopify
+  gross_revenue: shopify
+  refunds: shopify
+  net_revenue: shopify
+  active_customers: shopify
+  quiz_email_captures: klaviyo
+  quiz_store_taps: posthog
+  capture_to_store_tap_rate: posthog
+
+# Variance limits, decided 2026-11-02:
+# counts flag on any difference; money flags above 1% and is critical above 5%.
+thresholds:
+  count:
+    warn_abs: 0
+    critical_pct: 5.0
+  money:
+    warn_pct: 1.0
+    critical_pct: 5.0
+  rate:
+    warn_abs: 0
+    critical_pct: 5.0
+
+metric_kind:
+  order_count: count
+  gross_revenue: money
+  refunds: money
+  net_revenue: money
+  active_customers: count
+  quiz_email_captures: count
+  quiz_store_taps: count
+  capture_to_store_tap_rate: rate

@@ -1,0 +1,9 @@
+# Real exports and anything derived from them never leave this machine.
+data/raw/
+warehouse/
+reports/
+
+__pycache__/
+.pytest_cache/
+*.pyc
+.env

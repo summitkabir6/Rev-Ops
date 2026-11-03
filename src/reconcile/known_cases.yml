@@ -1,0 +1,73 @@
+# Disagreements found while running the quiz funnel (29 Sep - 29 Oct 2026), with their causes.
+# Each case has a check that re-measures the evidence from whatever data is loaded,
+# so the numbers printed next to a case always come from the current run.
+
+- id: lead_counts_three_ways
+  title: Three systems, three lead counts, for the first two days of the quiz
+  found: 2026-09-30
+  cause: >
+    Meta reported 3 leads for 29-30 Sep; only 2 were real people. The third was a test run
+    made without ?test=1. PostHog started tracking the quiz on the morning of 30 Sep, so it
+    missed the first real lead, and it showed the test run as "(no ad / direct)". Klaviyo's
+    list also held test profiles.
+  resolution: >
+    Klaviyo "LockedIn Quiz Completed" is the source of truth for leads, excluding internal
+    addresses. Internal addresses are now derived from the data: anyone who ever sent an
+    is_test event.
+  check: |
+    SELECT 'klaviyo quiz submissions, 29-30 Sep, all' AS measure, count(*) AS value
+    FROM stg_klaviyo_events WHERE stream = 'quiz_completed'
+      AND CAST(timezone('__TIMEZONE__', CAST(occurred_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-09-30'
+    UNION ALL
+    SELECT 'klaviyo leads, 29-30 Sep, internal and test excluded', count(DISTINCT email_norm)
+    FROM stg_klaviyo_events WHERE stream = 'quiz_completed' AND NOT is_test
+      AND email_norm NOT IN (SELECT email_norm FROM internal_emails)
+      AND CAST(timezone('__TIMEZONE__', CAST(occurred_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-09-30'
+    UNION ALL
+    SELECT 'posthog captures, 29-30 Sep, production, test excluded', count(*)
+    FROM stg_posthog_quiz_people WHERE is_production AND NOT is_test
+      AND CAST(timezone('__TIMEZONE__', CAST(email_submitted_at_utc AS TIMESTAMPTZ)) AS DATE) BETWEEN DATE '2026-09-29' AND DATE '2026-09-30'
+    UNION ALL
+    SELECT 'klaviyo leads before posthog''s first quiz_started event', count(DISTINCT email_norm)
+    FROM stg_klaviyo_events WHERE stream = 'quiz_completed' AND NOT is_test
+      AND email_norm NOT IN (SELECT email_norm FROM internal_emails)
+      AND occurred_at_utc < (SELECT min(started_at_utc) FROM stg_posthog_quiz_people WHERE is_production)
+    UNION ALL
+    SELECT 'internal addresses (is_test events or config list)', count(*) FROM internal_emails
+
+- id: unresolved_macro
+  title: A UTM template variable arrived unresolved
+  found: 2026-10
+  cause: >
+    The Meta ad URL template uses {{ad.name}} for utm_content. On at least one ad it did not
+    resolve, so the literal text "{{ad.name}}" was stored and those leads cannot be tied to an ad.
+  resolution: >
+    Flag any utm_content containing "{{" as unattributed. The longer fix is a check of every
+    utm_content against the list of live ad names.
+  check: |
+    SELECT 'klaviyo leads with a literal {{ in utm_content' AS measure, count(DISTINCT email_norm) AS value
+    FROM stg_klaviyo_events WHERE stream = 'quiz_completed' AND utm_content LIKE '%{{%'
+    UNION ALL
+    SELECT 'posthog quiz people with a literal {{ in utm_content', count(*)
+    FROM stg_posthog_quiz_people WHERE utm_content LIKE '%{{%'
+
+- id: no_post_purchase_attribution
+  title: No link from a Shopify order back to the touchpoint that produced it
+  found: 2026-10
+  cause: >
+    Shopify orders carry no UTM or touchpoint field in the data this pipeline receives, and
+    Klaviyo's Placed Order event carries none either. The only link between a quiz lead and an
+    order is the email address, which says who bought, not what made them buy.
+  resolution: >
+    Per-channel coupon codes or tagged links on each touchpoint, so an order records where it came from.
+  check: |
+    SELECT 'orders in the pulled window' AS measure, count(*) AS value
+    FROM fct_order WHERE source_of_truth = 'orders_api'
+    UNION ALL
+    SELECT 'klaviyo placed order events carrying any utm field', count(*)
+    FROM stg_klaviyo_events WHERE stream = 'placed_order' AND coalesce(utm_source, utm_campaign, utm_content) IS NOT NULL
+    UNION ALL
+    SELECT 'orders by a customer who is also a quiz lead (email match only)', count(*)
+    FROM fct_order WHERE source_of_truth = 'orders_api' AND customer_key IN (
+        SELECT c.customer_key FROM stg_klaviyo_events k JOIN email_to_customer c USING (email_norm)
+        WHERE k.stream = 'quiz_completed')

@@ -1,0 +1,15 @@
+[project]
+name = "rev-ops"
+version = "0.1.0"
+description = "Reconciliation and weekly reporting across Shopify, Klaviyo and PostHog."
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.1",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

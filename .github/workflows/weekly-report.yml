@@ -1,0 +1,26 @@
+# Proves the weekly job runs headless. Real exports never leave the laptop, so CI runs
+# the same command against the synthetic sample; the real run is a local cron entry.
+name: weekly-report
+
+on:
+  schedule:
+    - cron: "0 13 * * 1"   # Mondays 13:00 UTC, 08:00 or 09:00 in Toronto
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[test]"
+      - run: ./run.sh test
+      - run: ./run.sh report --dry-run
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weekly-report-sample
+          path: reports/

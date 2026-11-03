@@ -1,0 +1,9 @@
+# Addresses that belong to the business (owner and staff test runs) but never sent an
+# is_test event. Stored as sha256 of the lowercased, trimmed address, so no address is
+# committed. Add one with:
+#   python -c "import hashlib,sys; print(hashlib.sha256(sys.argv[1].strip().lower().encode()).hexdigest())" you@example.com
+sha256:
+  - 0617661f79e8f9afec979d7c236b95e4da19a97022b1cc0d6cfd6020217678bd
+  - e01be8463925786cc5a02e9e92ba09aeae2b9bffabb6e41665bfc500727d1139
+  - f586464f1ce0b14ec2afa27690b63301d24702a366896455898ed724fb4458b0
+

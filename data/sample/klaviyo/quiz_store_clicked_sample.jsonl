@@ -1,0 +1,8 @@
+{"id": "KT14", "metric_id": "M_STORE", "datetime": "2026-10-11T07:37:27+00:00", "profile_id": "L14", "profile_email": "lead012@example.com", "event_properties": {"$event_id": "T14", "is_test": false, "platform": "ios"}}
+{"id": "KT21", "metric_id": "M_STORE", "datetime": "2026-10-17T15:05:28+00:00", "profile_id": "L21", "profile_email": "lead018@example.com", "event_properties": {"$event_id": "T21", "is_test": false, "platform": "ios"}}
+{"id": "KT22", "metric_id": "M_STORE", "datetime": "2026-10-17T18:37:43+00:00", "profile_id": "L22", "profile_email": "lead030@example.com", "event_properties": {"$event_id": "T22", "is_test": false, "platform": "ios"}}
+{"id": "KT24", "metric_id": "M_STORE", "datetime": "2026-10-20T13:06:49+00:00", "profile_id": "L24", "profile_email": "lead000@example.com", "event_properties": {"$event_id": "T24", "is_test": false, "platform": "ios"}}
+{"id": "KT33", "metric_id": "M_STORE", "datetime": "2026-10-28T12:45:57+00:00", "profile_id": "L33", "profile_email": "lead006@example.com", "event_properties": {"$event_id": "T33", "is_test": false, "platform": "ios"}}
+{"id": "KT34", "metric_id": "M_STORE", "datetime": "2026-10-28T15:46:42+00:00", "profile_id": "L34", "profile_email": "lead036@example.com", "event_properties": {"$event_id": "T34", "is_test": false, "platform": "ios"}}
+{"id": "KT35", "metric_id": "M_STORE", "datetime": "2026-10-29T00:30:23+00:00", "profile_id": "L35", "profile_email": "lead024@example.com", "event_properties": {"$event_id": "T35", "is_test": false, "platform": "ios"}}
+{"id": "KT40", "metric_id": "M_STORE", "datetime": "2026-09-29T18:02:00+00:00", "profile_id": "L40", "profile_email": "owner@example.com", "event_properties": {"$event_id": "T40", "is_test": true, "platform": "ios"}}
