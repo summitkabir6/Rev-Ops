@@ -72,7 +72,7 @@ Pulled on 2026-11-03 for 5 July to 2 November 2026, printed by `./run.sh reconci
 
 The model built from them: 2,264 customers, 188 orders, 171 sends and 12,451 funnel rows (person x quiz screen).
 
-Carried over from an earlier write-up of mine, where they were measured and not re-measured here: the Klaviyo account held 8,304 profiles with a valid email in August and 8,531 in October, and an earlier check matched 1,461 per-recipient open events against Klaviyo's own per-campaign counts across 13 campaigns, with 0 mismatches.
+Carried over from an earlier write-up of mine, where they were measured and not re-measured here: the Klaviyo account held 8,304 profiles with a valid email in August and 8,531 in October, and an earlier check matched 1,461 per-recipient open events against Klaviyo's own per-campaign counts across 13 campaigns, with 0 mismatches. For the LockedIn quiz, 29 Sep - 29 Oct, it reports from PostHog 534 quiz starts, 388 completed results, 313 email captures and 116 store taps, with $622.68 of quiz spend coming to about $1.99 per email capture.
 
 ## The reconciliation, real run
 
@@ -117,7 +117,6 @@ The reconcile run re-measures each of these from the loaded data (`src/reconcile
 2. **An unresolved UTM macro.** Some traffic arrived with the literal text `{{ad.name}}` in `utm_content`, so those leads cannot be tied to an ad. On this run: 1 Klaviyo lead and 2 PostHog quiz people carry it.
 3. **No link from an order back to the touchpoint.** Of 168 orders in the window, 0 Klaviyo Placed Order events carry any UTM field. The only link between a quiz lead and an order is the email address (3 orders), which says who bought, not what made them buy. Fix: per-channel coupon codes or tagged links on each touchpoint.
 4. **Meta's lead count against Klaviyo's.** For the "ADHD Quiz" lead campaign, 29 Sep - 28 Oct, Meta Ads Manager reported 141 Website Leads on $324.19 of spend, $2.29 per lead. Klaviyo holds 136 real leads tagged with that campaign for the same days, so cost per lead on the source of truth is $2.38. One more lead in that window carries an unresolved `{{campaign.name}}`, a second instance of case 2. Meta is not pulled by this pipeline; its figures are carried over from an earlier write-up and printed with their source.
-5. **Published quiz funnel figures that PostHog does not reproduce.** An earlier write-up of mine publishes 534 starts, 388 completed results, 313 email captures and 116 store taps for 29 Sep - 29 Oct, labelled PostHog. Counted as people on the production quiz with tests excluded, PostHog holds 402, 150, 146 and 7, and no count of events or sessions reaches the published totals either. The per-ad rows in that write-up do reproduce, as raw event counts. The likely source of the totals is Meta Events Manager, which is not yet confirmed. The published cost per email capture, $1.99, divides $622.68 of spend by 313; on PostHog's 146 it is $4.26. Fix: no funnel figure is published without saying whether it counts events, sessions or people, and which host and test filters apply.
 
 ## Weekly report
 
