@@ -63,7 +63,7 @@ flowchart LR
     L1 --> B2
     B1 --> C1
     B2 --> C2
-    C1 --> W[Billable weight<br/>max(actual, dim)]
+    C1 --> W["Billable weight<br/>max(actual, dim)"]
     C2 --> W
 ```
 
@@ -93,7 +93,7 @@ Section 232 is computed exclusively from the metal content value stored in `mate
 flowchart TD
     PKG[Cartonized packages] --> ACT[Actual weight]
     PKG --> DIM[Dimensional weight<br/>L×W×H / divisor]
-    ACT --> BILL[Billable weight<br/>max(actual, dim)]
+    ACT --> BILL["Billable weight<br/>max(actual, dim)"]
     DIM --> BILL
     BILL --> BASE[Base lane rate<br/>carrier + service + zone]
     BILL --> SUR[Surcharges<br/>add’l handling · oversize · fuel]
