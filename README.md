@@ -1,5 +1,9 @@
 # Revenue Operations & Growth Systems
 
+[![Watch the 100-second walkthrough: one real order, from Shopify to shipping price, duty and reconciliation](media/rev-ops-explainer-poster.jpg)](media/rev-ops-explainer.mp4)
+
+*100-second walkthrough. Click to play.*
+
 Production systems for order automation, dynamic rate calculation, multi-layer tariff logic, multi-source reconciliation, and growth instrumentation.
 
 This repository documents and implements the operational data and decision layer built for a direct-to-consumer fitness equipment business. The primary system automates the path from Shopify order to customer-facing shipping price to fulfillment to delivery, incorporating real package characteristics, destination, and full tariff stacks (including Section 232 metal-content duties). Supporting systems provide independent reconciliation across data sources and event-level measurement of the customer journey.
@@ -24,6 +28,24 @@ The central system replaces manual or static shipping and duty calculations with
 | `tariff_rules` | one row per tariff line | MFN, Section 301, Section 232, IEEPA reciprocal — rates, bases, refund status |
 | `carton_profiles` + rate inputs | carton / parameter | Dimensional weight divisors, surcharge thresholds, observed lane rates |
 | Freightcom shipments & charge lines | shipment / charge | Quoted vs billed for variance attribution |
+
+### Technical Stack
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| Order intake | Shopify Admin API + webhooks (`orders/create`, `orders/updated`) | Real-time order capture |
+| Orchestration | Python (FastAPI or Temporal/Airflow) | Workflow orchestration, retries, observability |
+| Data store | PostgreSQL (primary) + Redis (cache) | SKU master, BOM, rules, audit log |
+| Rules engine | Versioned config (YAML/JSON in DB or Git) + Python evaluator | Tariffs, shipping rules, surcharges |
+| External integrations | Freightcom API, Klaviyo API, (optional) UPS/FedEx rate APIs | Booking, tracking, notifications |
+| Observability | Structured logging + metrics (Prometheus/Grafana or PostHog) + alerting | Variance, failure rates, margin leakage |
+| Deployment | Containerized (Docker) on cloud (AWS/GCP) with CI/CD | Production reliability |
+
+The reconciliation pipeline in this repository runs on Python 3.11, DuckDB and SQL, with pytest and a weekly GitHub Actions run.
+
+Fail-closed guardrails: the system refuses to auto-quote or auto-book on a missing or incomplete BOM, missing Section 232 metal-content data, an expired or mismatched tariff rule set, a billable-weight failure, no valid carrier option, a customer price below expected carrier cost + duty, or an order that fails validation.
+
+Full production architecture, data model, parameters and guardrails: [docs/order-automation-architecture.md](docs/order-automation-architecture.md)
 
 ### End-to-End Flow
 
