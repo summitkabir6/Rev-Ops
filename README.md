@@ -1,8 +1,8 @@
 # Revenue Operations & Growth Systems
 
-[![Watch the 100-second walkthrough: one real order, from Shopify to shipping price, duty and reconciliation](media/rev-ops-explainer-poster.jpg)](media/rev-ops-explainer.mp4)
+https://github.com/user-attachments/assets/58f6f313-76ad-4514-bfde-a647fb52b6cd
 
-*100-second walkthrough. Click to play.*
+*100-second walkthrough: one real order, from Shopify to shipping price, duty and reconciliation.*
 
 Production systems for order automation, dynamic rate calculation, multi-layer tariff logic, multi-source reconciliation, and growth instrumentation.
 
